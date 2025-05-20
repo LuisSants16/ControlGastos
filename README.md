@@ -53,8 +53,8 @@ ControlGastos/
 
 ## 📸 Capturas de Pantalla
 
-*(Aquí puedes incluir imágenes de la interfaz de la aplicación para ilustrar su funcionamiento.)*
+![image](https://github.com/user-attachments/assets/753fb2cf-83d0-4d42-a13c-e983dec87ac2)
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Derechos Reservados a Luis Miguel Santos Rivera
