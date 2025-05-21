@@ -1,10 +1,8 @@
-
 let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
 let gastosTemporales = [];
 
 function saludoDinamico() {
   const hora = new Date().getHours();
-  let emoji = "👋";
   let saludo = "¡Bienvenido!";
   if (hora >= 5 && hora < 12) saludo = "🌞 Buenos días";
   else if (hora < 18) saludo = "🌆 Buenas tardes";
@@ -59,7 +57,6 @@ function guardarBloque() {
   generarSugerenciaAI();
 }
 
-
 function editarGasto(bloqueIndex, gastoIndex) {
   const g = gastos[bloqueIndex].items[gastoIndex];
   const nuevaDescripcion = prompt("Editar descripción:", g.descripcion);
@@ -80,8 +77,8 @@ function eliminarGasto(bloqueIndex, gastoIndex) {
     localStorage.setItem("gastos", JSON.stringify(gastos));
     mostrarBloques();
     actualizarTotal();
-  actualizarGrafico();
-  generarSugerenciaAI();
+    actualizarGrafico();
+    generarSugerenciaAI();
   }
 }
 
@@ -90,13 +87,6 @@ function actualizarTotal() {
   gastos.forEach(b => b.items.forEach(g => total += g.monto));
   document.getElementById("totalGeneral").textContent = `💰 Total General: S/ ${total.toFixed(2)}`;
 }
-
-saludoDinamico();
-mostrarBloques();
-actualizarTotal();
-  actualizarGrafico();
-  generarSugerenciaAI();
-
 
 function mostrarAlertaGasto(subtotal) {
   const alerta = document.getElementById("alertaGasto");
@@ -132,7 +122,7 @@ function actualizarGrafico() {
   );
   const presupuestos = new Array(gastos.length).fill(presupuestoDiario);
 
-  if (typeof chart !== "undefined" && chart !== null) chart.destroy();
+  if (chart) chart.destroy();
   chart = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -165,7 +155,7 @@ function generarSugerenciaAI() {
   const div = document.getElementById("sugerenciaAI");
   const sueldo = parseFloat(localStorage.getItem("sueldoMensual") || "0");
   if (!sueldo || gastos.length === 0) {
-    div.textContent = "";
+    if (div) div.textContent = "";
     return;
   }
 
@@ -180,14 +170,13 @@ function generarSugerenciaAI() {
   });
 
   if (diasAltos >= 3) {
-    div.textContent = "🔴 Has excedido tu presupuesto diario en varios días. Considera reducir gastos en comida, movilidad o compras.";
+    div.textContent = "🔴 Has excedido tu presupuesto diario en varios días. Considera reducir gastos.";
   } else if (ahorro >= sueldo * 0.1) {
-    div.textContent = "🟢 ¡Bien hecho! Estás ahorrando una buena parte de tu sueldo. Puedes guardar ese excedente o invertirlo.";
+    div.textContent = "🟢 ¡Bien hecho! Estás ahorrando una buena parte de tu sueldo.";
   } else {
-    div.textContent = "🟡 Tus gastos están dentro de lo normal. Mantén el control para evitar desviaciones.";
+    div.textContent = "🟡 Tus gastos están dentro de lo normal.";
   }
 }
-
 
 function exportarJSON() {
   const data = JSON.stringify(gastos, null, 2);
@@ -210,11 +199,10 @@ function importarJSON(event) {
       if (Array.isArray(datos)) {
         gastos = datos;
         localStorage.setItem("gastos", JSON.stringify(gastos));
-mostrarBloques();
-actualizarTotal();
-try { actualizarGrafico(); } catch(e) { console.warn("Gráfico no disponible aún:", e.message); }
-generarSugerenciaAI();
-alert("✅ Datos importados correctamente.");
+        mostrarBloques();
+        actualizarTotal();
+        actualizarGrafico();
+        generarSugerenciaAI();
         alert("✅ Datos importados correctamente.");
       } else {
         throw new Error("Formato incorrecto");
@@ -260,47 +248,39 @@ function guardarSueldo() {
       div.textContent = "💼 Su sueldo es de: S/ " + sueldo.toFixed(2);
     }
     alert("💾 Sueldo guardado correctamente.");
-    mostrarBloques(); // para recalcular alertas
+    mostrarBloques();
   } else {
     alert("Ingresa un monto válido.");
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  const sueldoStr = localStorage.getItem("sueldoMensual");
-  const sueldoGuardado = parseFloat(sueldoStr);
-  const input = document.getElementById("sueldo");
-  const div = document.getElementById("sueldoMostrado");
+// Guardar visibilidad de bloques
+function guardarVisibilidadBloques() {
+  const visibilidad = {};
+  document.querySelectorAll(".bloque").forEach((bloque, i) => {
+    const fecha = gastos[i].fecha;
+    const oculto = bloque.querySelector(".contenido-gastos").classList.contains("oculto");
+    visibilidad[fecha] = oculto;
+  });
+  localStorage.setItem("visibilidadBloques", JSON.stringify(visibilidad));
+}
 
-  if (!isNaN(sueldoGuardado) && sueldoStr !== null) {
-    if (input) input.value = sueldoGuardado;
-    if (div) div.textContent = "💼 Su sueldo es de: S/ " + sueldoGuardado.toFixed(2);
-  } else {
-    if (div) div.textContent = "💼 Su sueldo aún no ha sido ingresado.";
+function obtenerVisibilidadBloques() {
+  try {
+    return JSON.parse(localStorage.getItem("visibilidadBloques")) || {};
+  } catch (e) {
+    return {};
   }
-});
-
+}
 
 function mostrarBloques() {
   const contenedor = document.getElementById("bloques");
   contenedor.innerHTML = "";
+  const visibilidadGuardada = obtenerVisibilidadBloques();
+
   gastos.forEach((bloque, index) => {
     const div = document.createElement("div");
     div.className = "bloque";
-    div.ondragover = (e) => e.preventDefault();
-    div.ondrop = (e) => {
-      e.preventDefault();
-      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-      if (data.bloqueIndex === index && data.gastoIndex !== undefined) {
-        const item = gastos[index].items.splice(data.gastoIndex, 1)[0];
-        gastos[index].items.push(item);
-        localStorage.setItem("gastos", JSON.stringify(gastos));
-        mostrarBloques();
-        actualizarTotal();
-        actualizarGrafico();
-        generarSugerenciaAI();
-      }
-    };
 
     const titulo = document.createElement("h3");
     titulo.innerHTML = "📅 " + bloque.fecha;
@@ -310,28 +290,27 @@ function mostrarBloques() {
     toggleBtn.className = "toggle-btn";
     toggleBtn.title = "Ocultar/Mostrar gastos";
 
+    const contenido = document.createElement("div");
+    contenido.className = "contenido-gastos";
+    if (visibilidadGuardada[bloque.fecha]) {
+      contenido.classList.add("oculto");
+      toggleBtn.innerHTML = "⬆️";
+    }
+
+    toggleBtn.onclick = () => {
+      contenido.classList.toggle("oculto");
+      toggleBtn.innerHTML = contenido.classList.contains("oculto") ? "⬆️" : "⬇️";
+      guardarVisibilidadBloques();
+    };
+
     titulo.appendChild(toggleBtn);
     div.appendChild(titulo);
 
-    const contenido = document.createElement("div");
-    contenido.className = "contenido-gastos";
-
-    const visibilidadGuardada = obtenerVisibilidadBloques();
-    if (visibilidadGuardada[bloque.fecha]) {
-      contenido.classList.add("oculto");
-    }
-
     let subtotal = 0;
-    
 
     bloque.items.forEach((g, i) => {
       const item = document.createElement("div");
       item.className = "bloque-item";
-      item.setAttribute("draggable", "true");
-      item.style.cursor = "grab";
-      item.ondragstart = (e) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify({bloqueIndex: index, gastoIndex: i}));
-      };
       item.innerHTML = `
         <span>${g.descripcion} (${g.hora})</span>
         <div class="gasto-acciones">
@@ -348,12 +327,6 @@ function mostrarBloques() {
     total.textContent = `🧾 Total del día: S/ ${subtotal.toFixed(2)}`;
     mostrarAlertaGasto(subtotal);
     contenido.appendChild(total);
-
-    const btns = document.createElement("div");
-    btns.style.display = "flex";
-    btns.style.justifyContent = "flex-end";
-    btns.style.gap = "10px";
-    btns.style.marginTop = "8px";
 
     const btnPDF = document.createElement("button");
     btnPDF.className = "btn-pdf";
@@ -374,120 +347,36 @@ function mostrarBloques() {
       }
     };
 
-    btns.appendChild(btnPDF);
-    btns.appendChild(btnBorrar);
-    btns.appendChild(btnPDF);
-    btns.appendChild(btnBorrar);
+    const acciones = document.createElement("div");
+    acciones.style.display = "flex";
+    acciones.style.justifyContent = "flex-end";
+    acciones.style.gap = "10px";
+    acciones.style.marginTop = "10px";
+    acciones.appendChild(btnPDF);
+    acciones.appendChild(btnBorrar);
 
-    const btnAgregar = document.createElement("button");
-    btnAgregar.className = "btn-agregar-secundario";
-    btnAgregar.innerHTML = "➕ Agregar gasto";
-    btnAgregar.onclick = () => {
-      if (contenido.querySelector('.form-inline')) return;
-
-      const form = document.createElement("div");
-      form.className = "form-inline";
-      form.style.display = "flex";
-      form.style.flexDirection = "column";
-      form.style.gap = "5px";
-      form.style.marginTop = "10px";
-
-      const catSelect = document.createElement("select");
-      catSelect.innerHTML = `
-        <option value="🍔 Comida">🍔 Comida</option>
-        <option value="🚗 Movilidad">🚗 Movilidad</option>
-        <option value="🏠 Casa">🏠 Casa</option>
-        <option value="📱 Tecnología">📱 Tecnología</option>
-        <option value="🎮 Entretenimiento">🎮 Entretenimiento</option>
-        <option value="🛒 Compras">🛒 Compras</option>
-        <option value="💼 Trabajo">💼 Trabajo</option>
-        <option value="🎁 Regalo">🎁 Regalo</option>
-        <option value="💊 Salud">💊 Salud</option>
-        <option value="📚 Educación">📚 Educación</option>
-        <option value="🌐 Internet">🌐 Internet</option>
-        <option value="💡 Servicios">💡 Servicios</option>
-      `;
-      catSelect.style.padding = "5px";
-
-      const descInput = document.createElement("input");
-      descInput.placeholder = "Descripción adicional";
-      descInput.style.padding = "5px";
-
-      const montoInput = document.createElement("input");
-      montoInput.type = "number";
-      montoInput.placeholder = "Monto (S/)";
-      montoInput.style.padding = "5px";
-
-      const guardarBtn = document.createElement("button");
-      guardarBtn.textContent = "✔️ Guardar gasto en este bloque";
-      guardarBtn.style.padding = "5px";
-      guardarBtn.style.background = "#28a745";
-      guardarBtn.style.color = "white";
-      guardarBtn.onclick = () => {
-        const descripcion = catSelect.value + " - " + descInput.value.trim();
-        const monto = parseFloat(montoInput.value);
-        if (!descInput.value.trim() || isNaN(monto)) return alert("Completa los campos.");
-        const hora = new Date().toLocaleTimeString();
-        const idx = gastos.findIndex(b => b.fecha === bloque.fecha);
-        if (idx !== -1) {
-          gastos[idx].items.push({ descripcion, monto, hora });
-          localStorage.setItem("gastos", JSON.stringify(gastos));
-          mostrarBloques();
-          actualizarTotal();
-          actualizarGrafico();
-          generarSugerenciaAI();
-        }
-      };
-
-      const cancelarBtn = document.createElement("button");
-      cancelarBtn.textContent = "❌ Cancelar";
-      cancelarBtn.style.padding = "5px";
-      cancelarBtn.style.background = "#dc3545";
-      cancelarBtn.style.color = "white";
-      cancelarBtn.onclick = () => form.remove();
-
-      const btnGroup = document.createElement("div");
-      btnGroup.style.display = "flex";
-      btnGroup.style.gap = "10px";
-      btnGroup.appendChild(guardarBtn);
-      btnGroup.appendChild(cancelarBtn);
-
-      form.appendChild(catSelect);
-      form.appendChild(descInput);
-      form.appendChild(montoInput);
-      form.appendChild(btnGroup);
-      contenido.appendChild(form);
-    };
-    btns.appendChild(btnAgregar);
-
-    contenido.appendChild(btns);
-
-    toggleBtn.onclick = () => {
-    contenido.classList.toggle("oculto");
-    toggleBtn.innerHTML = contenido.classList.contains("oculto") ? "⬆️" : "⬇️";
-    guardarVisibilidadBloques();
-  };
-
-
+    contenido.appendChild(acciones);
     div.appendChild(contenido);
     contenedor.appendChild(div);
   });
 }
 
-function guardarVisibilidadBloques() {
-  const visibilidad = {};
-  document.querySelectorAll(".bloque").forEach((bloque, i) => {
-    const fecha = gastos[i].fecha;
-    const oculto = bloque.querySelector(".contenido-gastos").classList.contains("oculto");
-    visibilidad[fecha] = oculto;
-  });
-  localStorage.setItem("visibilidadBloques", JSON.stringify(visibilidad));
-}
+window.addEventListener("DOMContentLoaded", () => {
+  saludoDinamico();
+  mostrarBloques();
+  actualizarTotal();
+  actualizarGrafico();
+  generarSugerenciaAI();
 
-function obtenerVisibilidadBloques() {
-  try {
-    return JSON.parse(localStorage.getItem("visibilidadBloques")) || {};
-  } catch (e) {
-    return {};
+  const sueldoStr = localStorage.getItem("sueldoMensual");
+  const sueldoGuardado = parseFloat(sueldoStr);
+  const input = document.getElementById("sueldo");
+  const div = document.getElementById("sueldoMostrado");
+
+  if (!isNaN(sueldoGuardado) && sueldoStr !== null) {
+    if (input) input.value = sueldoGuardado;
+    if (div) div.textContent = "💼 Su sueldo es de: S/ " + sueldoGuardado.toFixed(2);
+  } else {
+    if (div) div.textContent = "💼 Su sueldo aún no ha sido ingresado.";
   }
-}
+});
