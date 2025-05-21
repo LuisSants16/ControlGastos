@@ -59,167 +59,6 @@ function guardarBloque() {
   generarSugerenciaAI();
 }
 
-function mostrarBloques() {
-  const contenedor = document.getElementById("bloques");
-  contenedor.innerHTML = "";
-  gastos.forEach((bloque, index) => {
-    const div = document.createElement("div");
-    div.className = "bloque";
-    div.innerHTML = `<h3>📅 ${bloque.fecha}</h3>`;
-    let subtotal = 0;
-    div.ondragover = (e) => e.preventDefault();
-    div.ondrop = (e) => {
-      e.preventDefault();
-      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-      if (data.bloqueIndex === index && data.gastoIndex !== undefined) {
-        const item = gastos[index].items.splice(data.gastoIndex, 1)[0];
-        gastos[index].items.push(item);
-        localStorage.setItem("gastos", JSON.stringify(gastos));
-        mostrarBloques();
-        actualizarTotal();
-        actualizarGrafico();
-        generarSugerenciaAI();
-      }
-    };
-
-    bloque.items.forEach((g, i) => {
-      const item = document.createElement("div");
-      item.className = "bloque-item";
-    item.setAttribute("draggable", "true");
-    item.style.cursor = "grab";
-    item.ondragstart = (e) => {
-      e.dataTransfer.setData("text/plain", JSON.stringify({bloqueIndex: index, gastoIndex: i}));
-    };
-      item.innerHTML = `
-        <span>${g.descripcion} (${g.hora})</span>
-        <div class="gasto-acciones">
-          <span>S/ ${g.monto.toFixed(2)}</span>
-          <button class="btn-editar" onclick="editarGasto(${index}, ${i})">✏️</button>
-          <button class="btn-eliminar" onclick="eliminarGasto(${index}, ${i})">❌</button>
-        </div>`;
-      div.appendChild(item);
-      subtotal += g.monto;
-    });
-    mostrarAlertaGasto(subtotal);
-    const total = document.createElement("div");
-    total.className = "bloque-total";
-    total.textContent = `🧾 Total del día: S/ ${subtotal.toFixed(2)}`;
-    
-    const btns = document.createElement("div");
-    btns.style.display = "flex";
-    btns.style.justifyContent = "flex-end";
-    btns.style.gap = "10px";
-    btns.style.marginTop = "8px";
-
-    const btnAgregar = document.createElement("button");
-    btnAgregar.className = "btn-agregar-secundario";
-    btnAgregar.innerHTML = "➕ Agregar gasto";
-    btnAgregar.onclick = () => {
-      if (div.querySelector('.form-inline')) return;
-
-      const form = document.createElement("div");
-      form.className = "form-inline";
-      form.style.display = "flex";
-      form.style.flexDirection = "column";
-      form.style.gap = "5px";
-      form.style.marginTop = "10px";
-
-      const catSelect = document.createElement("select");
-      catSelect.innerHTML = `
-        <option value="🍔 Comida">🍔 Comida</option>
-        <option value="🚗 Movilidad">🚗 Movilidad</option>
-        <option value="🏠 Casa">🏠 Casa</option>
-        <option value="📱 Tecnología">📱 Tecnología</option>
-        <option value="🎮 Entretenimiento">🎮 Entretenimiento</option>
-        <option value="🛒 Compras">🛒 Compras</option>
-        <option value="💼 Trabajo">💼 Trabajo</option>
-        <option value="🎁 Regalo">🎁 Regalo</option>
-        <option value="💊 Salud">💊 Salud</option>
-        <option value="📚 Educación">📚 Educación</option>
-        <option value="🌐 Internet">🌐 Internet</option>
-        <option value="💡 Servicios">💡 Servicios</option>
-      `;
-      catSelect.style.padding = "5px";
-
-      const descInput = document.createElement("input");
-      descInput.placeholder = "Descripción adicional";
-      descInput.style.padding = "5px";
-
-      const montoInput = document.createElement("input");
-      montoInput.type = "number";
-      montoInput.placeholder = "Monto (S/)";
-      montoInput.style.padding = "5px";
-
-      const guardarBtn = document.createElement("button");
-      guardarBtn.textContent = "✔️ Guardar gasto en este bloque";
-      guardarBtn.style.padding = "5px";
-      guardarBtn.style.background = "#28a745";
-      guardarBtn.style.color = "white";
-      guardarBtn.onclick = () => {
-        const descripcion = catSelect.value + " - " + descInput.value.trim();
-        const monto = parseFloat(montoInput.value);
-        if (!descInput.value.trim() || isNaN(monto)) return alert("Completa los campos.");
-        const hora = new Date().toLocaleTimeString();
-        const idx = gastos.findIndex(b => b.fecha === bloque.fecha);
-        if (idx !== -1) {
-          gastos[idx].items.push({ descripcion, monto, hora });
-          localStorage.setItem("gastos", JSON.stringify(gastos));
-          mostrarBloques();
-          actualizarTotal();
-          actualizarGrafico();
-          generarSugerenciaAI();
-        }
-      };
-
-      const cancelarBtn = document.createElement("button");
-      cancelarBtn.textContent = "❌ Cancelar";
-      cancelarBtn.style.padding = "5px";
-      cancelarBtn.style.background = "#dc3545";
-      cancelarBtn.style.color = "white";
-      cancelarBtn.onclick = () => form.remove();
-
-      const btnGroup = document.createElement("div");
-      btnGroup.style.display = "flex";
-      btnGroup.style.gap = "10px";
-      btnGroup.appendChild(guardarBtn);
-      btnGroup.appendChild(cancelarBtn);
-
-      form.appendChild(catSelect);
-      form.appendChild(descInput);
-      form.appendChild(montoInput);
-      form.appendChild(btnGroup);
-      div.appendChild(form);
-    };
-
-    const btnBorrar = document.createElement("button");
-    btnBorrar.className = "btn-eliminar";
-    btnBorrar.innerHTML = "🗑️ Borrar bloque";
-    btnBorrar.onclick = () => {
-      if (confirm("¿Seguro que deseas borrar este bloque completo?")) {
-        gastos.splice(index, 1);
-        localStorage.setItem("gastos", JSON.stringify(gastos));
-        mostrarBloques();
-        actualizarTotal();
-        actualizarGrafico();
-        generarSugerenciaAI();
-      }
-    };
-
-    const btnPDF = document.createElement("button");
-btnPDF.className = "btn-pdf";
-btnPDF.innerHTML = "📄 Reporte";
-btnPDF.onclick = () => exportarBloqueReporte(index);
-
-btns.appendChild(btnAgregar);
-btns.appendChild(btnPDF);
-    btns.appendChild(btnBorrar);
-    div.appendChild(btns);
-
-    div.appendChild(total);
-
-    contenedor.appendChild(div);
-  });
-}
 
 function editarGasto(bloqueIndex, gastoIndex) {
   const g = gastos[bloqueIndex].items[gastoIndex];
@@ -439,3 +278,189 @@ window.addEventListener("DOMContentLoaded", () => {
     if (div) div.textContent = "💼 Su sueldo aún no ha sido ingresado.";
   }
 });
+
+function mostrarBloques() {
+  const contenedor = document.getElementById("bloques");
+  contenedor.innerHTML = "";
+  gastos.forEach((bloque, index) => {
+    const div = document.createElement("div");
+    div.className = "bloque";
+    div.ondragover = (e) => e.preventDefault();
+    div.ondrop = (e) => {
+      e.preventDefault();
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      if (data.bloqueIndex === index && data.gastoIndex !== undefined) {
+        const item = gastos[index].items.splice(data.gastoIndex, 1)[0];
+        gastos[index].items.push(item);
+        localStorage.setItem("gastos", JSON.stringify(gastos));
+        mostrarBloques();
+        actualizarTotal();
+        actualizarGrafico();
+        generarSugerenciaAI();
+      }
+    };
+
+    const titulo = document.createElement("h3");
+    titulo.innerHTML = "📅 " + bloque.fecha;
+
+    const toggleBtn = document.createElement("span");
+    toggleBtn.innerHTML = "⬇️";
+    toggleBtn.className = "toggle-btn";
+    toggleBtn.title = "Ocultar/Mostrar gastos";
+
+    titulo.appendChild(toggleBtn);
+    div.appendChild(titulo);
+
+    const contenido = document.createElement("div");
+    contenido.className = "contenido-gastos";
+
+    let subtotal = 0;
+    
+
+    bloque.items.forEach((g, i) => {
+      const item = document.createElement("div");
+      item.className = "bloque-item";
+      item.setAttribute("draggable", "true");
+      item.style.cursor = "grab";
+      item.ondragstart = (e) => {
+        e.dataTransfer.setData("text/plain", JSON.stringify({bloqueIndex: index, gastoIndex: i}));
+      };
+      item.innerHTML = `
+        <span>${g.descripcion} (${g.hora})</span>
+        <div class="gasto-acciones">
+          <span>S/ ${g.monto.toFixed(2)}</span>
+          <button class="btn-editar" onclick="editarGasto(${index}, ${i})">✏️</button>
+          <button class="btn-eliminar" onclick="eliminarGasto(${index}, ${i})">❌</button>
+        </div>`;
+      contenido.appendChild(item);
+      subtotal += g.monto;
+    });
+
+    const total = document.createElement("div");
+    total.className = "bloque-total";
+    total.textContent = `🧾 Total del día: S/ ${subtotal.toFixed(2)}`;
+    mostrarAlertaGasto(subtotal);
+    contenido.appendChild(total);
+
+    const btns = document.createElement("div");
+    btns.style.display = "flex";
+    btns.style.justifyContent = "flex-end";
+    btns.style.gap = "10px";
+    btns.style.marginTop = "8px";
+
+    const btnPDF = document.createElement("button");
+    btnPDF.className = "btn-pdf";
+    btnPDF.innerHTML = "📄 Reporte";
+    btnPDF.onclick = () => exportarBloqueReporte(index);
+
+    const btnBorrar = document.createElement("button");
+    btnBorrar.className = "btn-eliminar";
+    btnBorrar.innerHTML = "🗑️ Borrar bloque";
+    btnBorrar.onclick = () => {
+      if (confirm("¿Seguro que deseas borrar este bloque completo?")) {
+        gastos.splice(index, 1);
+        localStorage.setItem("gastos", JSON.stringify(gastos));
+        mostrarBloques();
+        actualizarTotal();
+        actualizarGrafico();
+        generarSugerenciaAI();
+      }
+    };
+
+    btns.appendChild(btnPDF);
+    btns.appendChild(btnBorrar);
+    btns.appendChild(btnPDF);
+    btns.appendChild(btnBorrar);
+
+    const btnAgregar = document.createElement("button");
+    btnAgregar.className = "btn-agregar-secundario";
+    btnAgregar.innerHTML = "➕ Agregar gasto";
+    btnAgregar.onclick = () => {
+      if (contenido.querySelector('.form-inline')) return;
+
+      const form = document.createElement("div");
+      form.className = "form-inline";
+      form.style.display = "flex";
+      form.style.flexDirection = "column";
+      form.style.gap = "5px";
+      form.style.marginTop = "10px";
+
+      const catSelect = document.createElement("select");
+      catSelect.innerHTML = `
+        <option value="🍔 Comida">🍔 Comida</option>
+        <option value="🚗 Movilidad">🚗 Movilidad</option>
+        <option value="🏠 Casa">🏠 Casa</option>
+        <option value="📱 Tecnología">📱 Tecnología</option>
+        <option value="🎮 Entretenimiento">🎮 Entretenimiento</option>
+        <option value="🛒 Compras">🛒 Compras</option>
+        <option value="💼 Trabajo">💼 Trabajo</option>
+        <option value="🎁 Regalo">🎁 Regalo</option>
+        <option value="💊 Salud">💊 Salud</option>
+        <option value="📚 Educación">📚 Educación</option>
+        <option value="🌐 Internet">🌐 Internet</option>
+        <option value="💡 Servicios">💡 Servicios</option>
+      `;
+      catSelect.style.padding = "5px";
+
+      const descInput = document.createElement("input");
+      descInput.placeholder = "Descripción adicional";
+      descInput.style.padding = "5px";
+
+      const montoInput = document.createElement("input");
+      montoInput.type = "number";
+      montoInput.placeholder = "Monto (S/)";
+      montoInput.style.padding = "5px";
+
+      const guardarBtn = document.createElement("button");
+      guardarBtn.textContent = "✔️ Guardar gasto en este bloque";
+      guardarBtn.style.padding = "5px";
+      guardarBtn.style.background = "#28a745";
+      guardarBtn.style.color = "white";
+      guardarBtn.onclick = () => {
+        const descripcion = catSelect.value + " - " + descInput.value.trim();
+        const monto = parseFloat(montoInput.value);
+        if (!descInput.value.trim() || isNaN(monto)) return alert("Completa los campos.");
+        const hora = new Date().toLocaleTimeString();
+        const idx = gastos.findIndex(b => b.fecha === bloque.fecha);
+        if (idx !== -1) {
+          gastos[idx].items.push({ descripcion, monto, hora });
+          localStorage.setItem("gastos", JSON.stringify(gastos));
+          mostrarBloques();
+          actualizarTotal();
+          actualizarGrafico();
+          generarSugerenciaAI();
+        }
+      };
+
+      const cancelarBtn = document.createElement("button");
+      cancelarBtn.textContent = "❌ Cancelar";
+      cancelarBtn.style.padding = "5px";
+      cancelarBtn.style.background = "#dc3545";
+      cancelarBtn.style.color = "white";
+      cancelarBtn.onclick = () => form.remove();
+
+      const btnGroup = document.createElement("div");
+      btnGroup.style.display = "flex";
+      btnGroup.style.gap = "10px";
+      btnGroup.appendChild(guardarBtn);
+      btnGroup.appendChild(cancelarBtn);
+
+      form.appendChild(catSelect);
+      form.appendChild(descInput);
+      form.appendChild(montoInput);
+      form.appendChild(btnGroup);
+      contenido.appendChild(form);
+    };
+    btns.appendChild(btnAgregar);
+
+    contenido.appendChild(btns);
+
+    toggleBtn.onclick = () => {
+      contenido.classList.toggle("oculto");
+      toggleBtn.innerHTML = contenido.classList.contains("oculto") ? "⬆️" : "⬇️";
+    };
+
+    div.appendChild(contenido);
+    contenedor.appendChild(div);
+  });
+}

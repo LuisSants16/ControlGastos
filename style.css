@@ -179,3 +179,23 @@ body.dark .btn-importar {
   background: #f0b400;
   color: black;
 }
+
+
+.contenido-gastos.oculto {
+  display: none;
+}
+
+
+.contenido-gastos.oculto {
+  display: none;
+}
+
+.oculto {
+  display: none;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-left: 10px;
+}
