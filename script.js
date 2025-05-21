@@ -267,17 +267,19 @@ function guardarSueldo() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  const sueldoGuardado = parseFloat(localStorage.getItem("sueldoMensual") || "0");
+  const sueldoStr = localStorage.getItem("sueldoMensual");
+  const sueldoGuardado = parseFloat(sueldoStr);
   const input = document.getElementById("sueldo");
   const div = document.getElementById("sueldoMostrado");
 
-  if (!isNaN(sueldoGuardado) && sueldoGuardado > 0) {
+  if (!isNaN(sueldoGuardado) && sueldoStr !== null) {
     if (input) input.value = sueldoGuardado;
     if (div) div.textContent = "💼 Su sueldo es de: S/ " + sueldoGuardado.toFixed(2);
   } else {
     if (div) div.textContent = "💼 Su sueldo aún no ha sido ingresado.";
   }
 });
+
 
 function mostrarBloques() {
   const contenedor = document.getElementById("bloques");
@@ -313,6 +315,11 @@ function mostrarBloques() {
 
     const contenido = document.createElement("div");
     contenido.className = "contenido-gastos";
+
+    const visibilidadGuardada = obtenerVisibilidadBloques();
+    if (visibilidadGuardada[bloque.fecha]) {
+      contenido.classList.add("oculto");
+    }
 
     let subtotal = 0;
     
@@ -456,11 +463,31 @@ function mostrarBloques() {
     contenido.appendChild(btns);
 
     toggleBtn.onclick = () => {
-      contenido.classList.toggle("oculto");
-      toggleBtn.innerHTML = contenido.classList.contains("oculto") ? "⬆️" : "⬇️";
-    };
+    contenido.classList.toggle("oculto");
+    toggleBtn.innerHTML = contenido.classList.contains("oculto") ? "⬆️" : "⬇️";
+    guardarVisibilidadBloques();
+  };
+
 
     div.appendChild(contenido);
     contenedor.appendChild(div);
   });
+}
+
+function guardarVisibilidadBloques() {
+  const visibilidad = {};
+  document.querySelectorAll(".bloque").forEach((bloque, i) => {
+    const fecha = gastos[i].fecha;
+    const oculto = bloque.querySelector(".contenido-gastos").classList.contains("oculto");
+    visibilidad[fecha] = oculto;
+  });
+  localStorage.setItem("visibilidadBloques", JSON.stringify(visibilidad));
+}
+
+function obtenerVisibilidadBloques() {
+  try {
+    return JSON.parse(localStorage.getItem("visibilidadBloques")) || {};
+  } catch (e) {
+    return {};
+  }
 }
