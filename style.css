@@ -1,4 +1,3 @@
-
 body {
   margin: 0;
   font-family: sans-serif;
@@ -129,7 +128,6 @@ body.dark .btn-eliminar {
   transition: 1s;
 }
 
-
 .alerta-gasto {
   text-align: center;
   font-weight: bold;
@@ -141,7 +139,6 @@ body.dark .btn-eliminar {
 .alerta-ok { color: green; }
 .alerta-media { color: orange; }
 .alerta-alta { color: red; }
-
 
 .sugerencia-ai {
   background: #eaf4fc;
@@ -159,9 +156,6 @@ body.dark .sugerencia-ai {
   border-left-color: #64b5f6;
 }
 
-
-
-
 .sueldo-fijo {
   text-align: center;
   font-weight: bold;
@@ -169,8 +163,6 @@ body.dark .sugerencia-ai {
   margin-bottom: 10px;
   color: #333;
 }
-
-
 body.dark .sueldo-fijo {
   color: #eee;
 }
@@ -178,11 +170,6 @@ body.dark .sueldo-fijo {
 body.dark .btn-importar {
   background: #f0b400;
   color: black;
-}
-
-
-.contenido-gastos.oculto {
-  display: none;
 }
 
 .contenido-gastos.oculto {
@@ -197,4 +184,104 @@ body.dark .btn-importar {
   cursor: pointer;
   font-size: 1.2rem;
   margin-left: 10px;
+}
+
+/* Estilo para elemento arrastrado */
+.bloque-item.dragging {
+  background-color: #dcefff;
+  border: 2px dashed #2196f3;
+  opacity: 0.8;
+}
+body.dark .bloque-item.dragging {
+  background-color: #2a3e4c;
+  border-color: #64b5f6;
+}
+
+/* Estilo para destino */
+.bloque-item.drop-target {
+  background-color: #cceeff;
+  border: 2px dashed #00aaff;
+}
+body.dark .bloque-item.drop-target {
+  background-color: #294c60;
+  border-color: #4fc3f7;
+}
+
+/* Estilo para cambio */
+.gasto-cambiado {
+  animation: resaltarGasto 1s ease-out;
+}
+@keyframes resaltarGasto {
+  0% {
+    background-color: #ffe082;
+    border: 2px solid #ffca28;
+  }
+  100% {
+    background-color: inherit;
+    border: none;
+  }
+}
+body.dark .gasto-cambiado {
+  animation: resaltarGastoDark 1s ease-out;
+}
+@keyframes resaltarGastoDark {
+  0% {
+    background-color: #4e3f1b;
+    border: 2px solid #ffca28;
+  }
+  100% {
+    background-color: inherit;
+    border: none;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .form, .acciones {
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .form input, .form select, .form button,
+  .acciones button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.05rem;
+    border-radius: 8px;
+  }
+
+  .form input::placeholder {
+    font-size: 0.95rem;
+  }
+
+  .btn-importar {
+    font-weight: bold;
+  }
+
+  #sueldoMostrado {
+    margin-bottom: 15px;
+    font-size: 1.15rem;
+  }
+
+  .alerta-gasto {
+    margin: 12px 0;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .acciones button {
+    background: #eee;
+  }
+
+  body.dark .acciones button {
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+  }
+
+  body.dark .btn-importar {
+    background: #ffc107;
+    color: black;
+  }
 }
