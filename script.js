@@ -106,14 +106,20 @@ function mostrarBloques() {
   const item = document.createElement("div");
   item.className = "bloque-item";
 
-    item.innerHTML = `
-      <span>${g.descripcion} (${g.hora})</span>
-      <div class="gasto-acciones">
-        <span>S/ ${g.monto.toFixed(2)}</span>
-        <button onclick="editarGasto('${bloque.fecha}', ${i})">✏️</button>
-        <button onclick="eliminarGasto('${bloque.fecha}', ${i})">❌</button>
-      </div>
-    `;
+const puedeSubir = i > 0;
+const puedeBajar = i < bloque.items.length - 1;
+
+  item.innerHTML = `
+    <span>${g.descripcion} (${g.hora})</span>
+    <div class="gasto-acciones">
+      <span>S/ ${g.monto.toFixed(2)}</span>
+      ${puedeSubir ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'up')">⬆️</button>` : ""}
+      ${puedeBajar ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'down')">⬇️</button>` : ""}
+      <button onclick="editarGasto('${bloque.fecha}', ${i})">✏️</button>
+      <button onclick="eliminarGasto('${bloque.fecha}', ${i})">❌</button>
+    </div>
+  `;
+
     div.appendChild(item);
     subtotal += g.monto;
   });
@@ -123,6 +129,27 @@ function mostrarBloques() {
   total.textContent = `🧾 Total del día: S/ ${subtotal.toFixed(2)}`;
   div.appendChild(total);
   contenedor.appendChild(div);
+
+  const sueldo = parseFloat(localStorage.getItem("sueldoMensual") || "0");
+  const limiteDiario = sueldo / 30;
+
+  const mensaje = document.createElement("div");
+  mensaje.style.padding = "10px";
+  mensaje.style.marginTop = "10px";
+  mensaje.style.borderRadius = "8px";
+  mensaje.style.fontWeight = "bold";
+  mensaje.style.textAlign = "center";
+
+  if (limiteDiario > 0) {
+    if (subtotal > limiteDiario) {
+      mensaje.textContent = `⚠️ ¡Has superado el gasto diario sugerido de S/ ${limiteDiario.toFixed(2)}!`;
+      mensaje.style.backgroundColor = "#ff5252aa";
+    } else {
+      mensaje.textContent = `✅ Vas bien. Has gastado S/ ${subtotal.toFixed(2)} de un máximo sugerido de S/ ${limiteDiario.toFixed(2)}.`;
+      mensaje.style.backgroundColor = "#4caf5099";
+    }
+    div.insertBefore(mensaje, total);
+  }
 
   const acciones = document.createElement("div");
   acciones.className = "bloque-acciones";
@@ -245,6 +272,48 @@ function eliminarGasto(fecha, index) {
     mostrarBloques();
     actualizarTotal();
   }
+}
+
+function moverGasto(fecha, index, direccion) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+
+  let nuevoIndex = index;
+  let tipoMovimiento = null;
+
+  if (direccion === 'up' && index > 0) {
+    [bloque.items[index - 1], bloque.items[index]] = [bloque.items[index], bloque.items[index - 1]];
+    nuevoIndex = index - 1;
+    tipoMovimiento = 'subio';
+  } else if (direccion === 'down' && index < bloque.items.length - 1) {
+    [bloque.items[index + 1], bloque.items[index]] = [bloque.items[index], bloque.items[index + 1]];
+    nuevoIndex = index + 1;
+    tipoMovimiento = 'bajo';
+  } else {
+    return;
+  }
+
+  localStorage.setItem("gastos", JSON.stringify(gastos));
+  mostrarBloques();
+
+  setTimeout(() => {
+    const bloquesDOM = document.querySelectorAll(".bloque");
+    bloquesDOM.forEach(b => {
+      const items = b.querySelectorAll(".bloque-item");
+      const item1 = items[nuevoIndex];
+      const item2 = items[index];
+
+      if (item1) {
+        item1.classList.add(tipoMovimiento === 'subio' ? 'gasto-subio' : 'gasto-bajo');
+        setTimeout(() => item1.classList.remove(tipoMovimiento === 'subio' ? 'gasto-subio' : 'gasto-bajo'), 1000);
+      }
+
+      if (item2) {
+        item2.classList.add(tipoMovimiento === 'subio' ? 'gasto-bajo' : 'gasto-subio');
+        setTimeout(() => item2.classList.remove(tipoMovimiento === 'subio' ? 'gasto-bajo' : 'gasto-subio'), 1000);
+      }
+    });
+  }, 100);
 }
 
 function actualizarTotal() {

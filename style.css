@@ -267,6 +267,20 @@ body.dark .btn-importar {
   letter-spacing: 1px;
 }
 
+.gasto-movido {
+  background-color: #4caf50aa !important;
+  transition: background-color 0.5s ease;
+}
+
+.gasto-subio {
+  background-color: #4caf5099 !important;
+  transition: background-color 0.4s ease;
+}
+
+.gasto-bajo {
+  background-color: #4d4c4cd0 !important;
+  transition: background-color 0.4s ease;
+}
 
 footer {
   margin-top: 30px;
