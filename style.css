@@ -1,287 +1,422 @@
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #f4f4f4;
-  color: #333;
-  transition: 1s;
+
+body{
+  font-family: monospace;
+  background-color: rgba(0, 0, 0, 0.637);
 }
 
 .container {
-  max-width: 800px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: 1s;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 25px;
+  background: #1f1f1f;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
 }
 
-h1, h2 {
+.top-bar, h1, h2 {
   text-align: center;
+  margin-bottom: 10px;
 }
 
-.form, .acciones {
+h1 {
+  font-size: 1.8rem;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+}
+
+.sueldo-fijo {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.form {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
 }
 
-.form input, .form select {
+.form input, .form select, .form button {
   padding: 10px;
-  border: 1px solid #ccc;
-  transition: 1s;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: none;
   font-size: 1rem;
 }
 
 button {
-  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.acciones button {
+  padding: 10px 16px;
+  border-radius: 8px;
   font-size: 1rem;
   border: none;
-  border-radius: 6px;
+  background: #eee;
+  color: #000;
+}
+
+body.dark .acciones button {
+  background: #333;
+  color: #fff;
+}
+
+.btn-importar {
+  background: #fbc02d;
+}
+
+body.dark .btn-importar {
+  background: #fdd835;
+  color: #000;
+}
+
+.calendario {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.calendario table {
+  width: 100%;
+  border-spacing: 10px;
+  color: #fff;
+}
+
+.calendario td {
+  width: 14.2%;
+  aspect-ratio: 1 / 1;
+  background: #1a1a1a;
+  border-radius: 50%;
   cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
 }
 
-.preview, #bloques {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.calendario td:hover {
+  background: #fdd835;
+  color: #000;
 }
 
-.preview-item, .bloque-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px dashed #ccc;
-  transition: 1s;
-  padding: 5px;
+.calendario .activo {
+  background: #fdd835;
+  color: #000;
 }
 
 .bloque {
-  background: #e1f5fe;
-  padding: 10px;
-  transition: 1s;
-  border-radius: 8px;
-  border-left: 5px solid #0288d1;
+  background: #2c2c2c;
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.bloque-item {
+  background: #3a3a3a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .bloque-total {
   text-align: right;
   font-weight: bold;
+  margin-top: 10px;
 }
 
 .gasto-acciones {
   display: flex;
-  gap: 5px;
   align-items: center;
+  gap: 8px;
 }
 
 .gasto-acciones button {
-  font-size: 0.9rem;
-  padding: 2px 6px;
-}
-
-.btn-editar {
-  background: #ffc107;
-}
-
-.btn-eliminar {
-  background: #dc3545;
-  color: white;
-  transition: 1s;
-}
-
-.top-bar {
-  background: #007bff;
-  color: white;
-  transition: 1s;
-  padding: 10px;
-  text-align: center;
-  font-weight: bold;
-}
-
-body.dark {
-  background: #1e1e1e;
-  color: #eee;
-  transition: 1s;
-}
-
-body.dark .container {
-  background: #2e2e2e;
-  transition: 1s;
-}
-
-body.dark .bloque {
-  background: #3e3e3e;
-  transition: 1s;
-}
-
-body.dark .btn-editar {
-  background: #f0ad4e;
-  transition: 1s;
-}
-
-body.dark .btn-eliminar {
-  background: #e74c3c;
-  transition: 1s;
-}
-
-.alerta-gasto {
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  padding: 8px;
-  border-radius: 6px;
-}
-.alerta-ok { color: green; }
-.alerta-media { color: orange; }
-.alerta-alta { color: red; }
-
-.sugerencia-ai {
-  background: #eaf4fc;
-  color: #333;
-  padding: 12px;
-  margin: 15px auto;
-  max-width: 800px;
-  border-left: 5px solid #2196f3;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-body.dark .sugerencia-ai {
-  background: #333;
-  color: #eee;
-  border-left-color: #64b5f6;
-}
-
-.sueldo-fijo {
-  text-align: center;
-  font-weight: bold;
+  background: transparent;
+  border: none;
   font-size: 1.1rem;
-  margin-bottom: 10px;
-  color: #333;
-}
-body.dark .sueldo-fijo {
-  color: #eee;
-}
-
-body.dark .btn-importar {
-  background: #f0b400;
-  color: black;
-}
-
-.contenido-gastos.oculto {
-  display: none;
-}
-
-.oculto {
-  display: none;
-}
-
-.toggle-btn {
   cursor: pointer;
-  font-size: 1.2rem;
-  margin-left: 10px;
+  color: inherit;
 }
 
-/* Estilo para elemento arrastrado */
 .bloque-item.dragging {
-  background-color: #dcefff;
-  border: 2px dashed #2196f3;
-  opacity: 0.8;
-}
-body.dark .bloque-item.dragging {
-  background-color: #2a3e4c;
-  border-color: #64b5f6;
+  opacity: 0.6;
+  background-color: #ff800963;
 }
 
-/* Estilo para destino */
-.bloque-item.drop-target {
-  background-color: #cceeff;
-  border: 2px dashed #00aaff;
-}
-body.dark .bloque-item.drop-target {
-  background-color: #294c60;
-  border-color: #4fc3f7;
-}
-
-/* Estilo para cambio */
-.gasto-cambiado {
-  animation: resaltarGasto 1s ease-out;
-}
-@keyframes resaltarGasto {
-  0% {
-    background-color: #ffe082;
-    border: 2px solid #ffca28;
-  }
-  100% {
-    background-color: inherit;
-    border: none;
-  }
-}
-body.dark .gasto-cambiado {
-  animation: resaltarGastoDark 1s ease-out;
-}
-@keyframes resaltarGastoDark {
-  0% {
-    background-color: #4e3f1b;
-    border: 2px solid #ffca28;
-  }
-  100% {
-    background-color: inherit;
-    border: none;
-  }
+.calendario {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
+.calendario table {
+  width: 100%;
+  border-spacing: 8px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.calendario th {
+  padding-bottom: 10px;
+  color: #fdd835;
+  font-size: 0.95rem;
+}
+
+.calendario td {
+  width: 14.2%;
+  height: 48px;
+  background: #1f1f1f;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 1rem;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 48px;
+}
+
+.calendario td:hover {
+  background: #ffffff;
+}
+
+.calendario td.activo {
+  background: #fdd835;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.bloque-acciones {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.bloque-acciones button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  background: #e0e0e0;
+  color: #111;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: 0.2s ease;
+}
+
+.bloque-acciones button:hover {
+  background: #d5d5d5;
+  transform: translateY(-1px);
+}
+
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 0 10px;
+}
+
+.calendario-header button {
+  background: #373a4a55;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.calendario-header button:hover {
+  background: #1565c0;
+}
+
+.calendario-header span#tituloMes {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #fdd835;
+  letter-spacing: 1px;
+}
+
+
+footer {
+  margin-top: 30px;
+  text-align: center;
+  color: #aaa;
+}
+
+body:not(.dark) {
+  background: #f0f0f0;
+  color: #111;
+}
+
+body:not(.dark) .container {
+  background: #fff;
+  color: #111;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) .acciones button {
+  background: #44444459;
+  color: #000000;
+}
+
+body:not(.dark) .btn-importar {
+  background: #fbc02d;
+  color: #000;
+}
+
+body:not(.dark) .bloque {
+  background: #f8f8f8;
+  color: #000;
+}
+
+body:not(.dark) .bloque-item {
+  background: #eaeaea;
+  color: #000;
+}
+
+body:not(.dark) .calendario {
+  background: #e4e4e4;
+  color: #000;
+}
+
+body:not(.dark) .calendario td {
+  background: #fff;
+  color: #000;
+}
+
+body:not(.dark) .calendario td:hover {
+  background: #fdd835;
+  color: #000;
+}
+
+body:not(.dark) .calendario td.activo {
+  background: #fdd835;
+  color: #000;
+}
+
+body.dark .bloque-acciones button {
+  background: #333;
+  color: #fff;
+}
+
+body.dark .bloque-acciones button:hover {
+  background: #444;
+}
 
 @media (max-width: 600px) {
-  .form, .acciones {
-    gap: 12px;
-    margin-bottom: 1rem;
+  .container {
+    padding: 15px;
   }
 
-  .form input, .form select, .form button,
-  .acciones button {
+  h1 {
+    font-size: 1.3rem;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .form,
+  .acciones,
+  .bloque-acciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .form input,
+  .form select,
+  .form button,
+  .acciones button,
+  .bloque-acciones button {
     width: 100%;
+    font-size: 1rem;
     padding: 12px;
-    font-size: 1.05rem;
-    border-radius: 8px;
+    border-radius: 10px;
+    margin: 0;
+    box-sizing: border-box;
   }
 
   .form input::placeholder {
     font-size: 0.95rem;
   }
 
-  .btn-importar {
+  .form button,
+  .acciones button,
+  .bloque-acciones button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
     font-weight: bold;
   }
 
-  #sueldoMostrado {
-    margin-bottom: 15px;
-    font-size: 1.15rem;
+  .calendario-header {
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .alerta-gasto {
-    margin: 12px 0;
-    font-size: 1rem;
+  .calendario-header span#tituloMes {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .calendario td {
+    height: 40px;
+    font-size: 0.9rem;
+    line-height: 40px;
+  }
+
+  .bloque {
     padding: 10px;
-    border-radius: 6px;
   }
 
-  .acciones button {
-    background: #eee;
+  .bloque-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.95rem;
   }
 
-  body.dark .acciones button {
-    background: #333;
-    color: white;
-    border: 1px solid #555;
+  .bloque-total {
+    text-align: left;
+    font-size: 0.95rem;
   }
 
-  body.dark .btn-importar {
-    background: #ffc107;
-    color: black;
+  footer {
+    font-size: 0.85rem;
+    padding: 10px;
+    text-align: center;
   }
 }

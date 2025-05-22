@@ -1,20 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>💰 Control de Gastos Diario</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
-  <link rel="stylesheet" href="style.css" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="./style-diseño-calendario.css" />
 </head>
-<body>
-  <header id="topBar" class="top-bar"></header>
-
+<body class="dark">
   <div class="container">
     <h1>💰 Control de Gastos Diario</h1>
-  <div id="sueldoMostrado" class="sueldo-fijo">💼 Su sueldo es de: S/ 0.00</div>
+    <div class="sueldo-fijo">💼 Su sueldo es de: S/ <span id="sueldoMostrado">0.00</span></div>
 
     <div class="form">
       <select id="categoria">
@@ -28,8 +23,6 @@
         <option value="🎁 Regalo">🎁 Regalo</option>
         <option value="💊 Salud">💊 Salud</option>
         <option value="📚 Educación">📚 Educación</option>
-        <option value="🌐 Internet">🌐 Internet</option>
-        <option value="💡 Servicios">💡 Servicios</option>
       </select>
       <input type="text" id="descripcion" placeholder="Descripción adicional..." />
       <input type="number" id="monto" placeholder="Monto (S/.)" />
@@ -37,37 +30,39 @@
     </div>
 
     <div class="form">
-      <input type="number" id="sueldo" placeholder="💼 Sueldo mensual (S/.)" />
+      <input type="number" id="sueldo" placeholder="💰 Sueldo mensual (S/.)" />
       <button onclick="guardarSueldo()">💾 Guardar Sueldo</button>
-
     </div>
-    <div id="alertaGasto" class="alerta-gasto"></div>
 
     <div class="acciones">
-      <button onclick="exportarJSON()">📥 Exportar JSON</button>
+      <button onclick="exportarJSON()">⬇️ Exportar JSON</button>
       <input type="file" id="importarJSONInput" accept=".json" onchange="importarJSON(event)" style="display: none;" />
-      <button onclick="document.getElementById('importarJSONInput').click()" class="btn-importar">📤 Importar JSON</button>
-
-      <button onclick="guardarBloque()">📆 Guardar Gasto del Día</button>
-      <button onclick="toggleDarkMode()">🌓 Modo Oscuro</button>
+      <button onclick="document.getElementById('importarJSONInput').click()" class="btn-importar">⬆️ Importar JSON</button>
+      <button onclick="guardarBloque()">📅 Guardar Gasto del Día</button>
+      <button id="modoOscuroBtn" onclick="toggleDarkMode()">🌗 Modo Oscuro</button>
     </div>
 
     <h2 id="totalGeneral">💰 Total General: S/ 0.00</h2>
 
-    <div id="sugerenciaAI" class="sugerencia-ai"></div>
+    <div class="calendario" id="calendario">
+      <div class="calendario-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <button id="prevMes">⬅️</button>
+        <span id="tituloMes" style="font-weight: bold;"></span>
+        <button id="nextMes">➡️</button>
+      </div>
+      <div id="calendarioTabla"></div>
+    </div>
 
-    <div id="previewGastos" class="preview"></div>
     <div id="bloques"></div>
-    <canvas id="graficoGastos" height="100"></canvas>
+    <div id="previewGastos" class="preview"></div>
   </div>
 
-  <footer align="center">
-    <p >Derechos Reservados &copy Luis M. Santos Rivera</p>
+  <footer>
+    <p>© 2025 Luis M. Santos Rivera</p>
   </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="script.js" defer></script>
+  <script src="./script-calendario.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </body>
 </html>
