@@ -106,19 +106,49 @@ function mostrarBloques() {
   const item = document.createElement("div");
   item.className = "bloque-item";
 
-const puedeSubir = i > 0;
-const puedeBajar = i < bloque.items.length - 1;
+  const puedeSubir = i > 0;
+  const puedeBajar = i < bloque.items.length - 1;
 
+  if (g.editando) {
+  item.classList.add("editando");
   item.innerHTML = `
-    <span>${g.descripcion} (${g.hora})</span>
-    <div class="gasto-acciones">
-      <span>S/ ${g.monto.toFixed(2)}</span>
-      ${puedeSubir ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'up')">⬆️</button>` : ""}
-      ${puedeBajar ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'down')">⬇️</button>` : ""}
-      <button onclick="editarGasto('${bloque.fecha}', ${i})">✏️</button>
-      <button onclick="eliminarGasto('${bloque.fecha}', ${i})">❌</button>
+    <select id="editCat${g.id}">
+      <option value="🍔 Comida">🍔 Comida</option>
+      <option value="🚗 Movilidad">🚗 Movilidad</option>
+      <option value="🏠 Casa">🏠 Casa</option>
+      <option value="📱 Tecnología">📱 Tecnología</option>
+      <option value="🎮 Entretenimiento">🎮 Entretenimiento</option>
+      <option value="🛒 Compras">🛒 Compras</option>
+      <option value="💼 Trabajo">💼 Trabajo</option>
+      <option value="🎁 Regalo">🎁 Regalo</option>
+      <option value="💊 Salud">💊 Salud</option>
+      <option value="📚 Educación">📚 Educación</option>
+    </select>
+    <input type="text" id="editDesc${g.id}" value="${g.descripcion.split(' - ')[1] || ''}" placeholder="Descripción" />
+    <input type="number" id="editMonto${g.id}" value="${g.monto}" placeholder="Monto (S/.)" />
+    <div class="edit-botones">
+      <button onclick="confirmarEdicionInline('${bloque.fecha}', ${i})">✔️</button>
+      <button onclick="cancelarEdicionInline('${bloque.fecha}', ${i})">❌</button>
     </div>
   `;
+
+    setTimeout(() => {
+      document.getElementById(`editCat${g.id}`).value = g.descripcion.split(" - ")[0];
+      document.getElementById(`editDesc${g.id}`).focus();
+    }, 10);
+
+  } else {
+    item.innerHTML = `
+      <span>${g.descripcion} (${g.hora})</span>
+      <div class="gasto-acciones">
+        <span>S/ ${g.monto.toFixed(2)}</span>
+        ${i > 0 ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'up')">⬆️</button>` : ""}
+        ${i < bloque.items.length - 1 ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'down')">⬇️</button>` : ""}
+        <button onclick="editarGastoInline('${bloque.fecha}', ${i})">✏️</button>
+        <button onclick="eliminarGasto('${bloque.fecha}', ${i})">❌</button>
+      </div>
+    `;
+  }
 
     div.appendChild(item);
     subtotal += g.monto;
@@ -237,6 +267,9 @@ const puedeBajar = i < bloque.items.length - 1;
     btnGroup.style.gap = "10px";
     btnGroup.appendChild(guardarBtn);
     btnGroup.appendChild(cancelarBtn);
+    btnGroup.className = "btn-group";
+    btnGroup.appendChild(guardarBtn);
+    btnGroup.appendChild(cancelarBtn);
 
     form.appendChild(catSelect);
     form.appendChild(descInput);
@@ -247,6 +280,43 @@ const puedeBajar = i < bloque.items.length - 1;
 
   acciones.appendChild(btnAgregarGasto);
   div.appendChild(acciones);
+}
+
+function editarGastoInline(fecha, index) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+  bloque.items[index].editando = true;
+  mostrarBloques();
+}
+
+function cancelarEdicionInline(fecha, index) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+  delete bloque.items[index].editando;
+  mostrarBloques();
+}
+
+function confirmarEdicionInline(fecha, index) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+
+  const g = bloque.items[index];
+  const cat = document.getElementById(`editCat${g.id}`).value;
+  const desc = document.getElementById(`editDesc${g.id}`).value.trim();
+  const monto = parseFloat(document.getElementById(`editMonto${g.id}`).value);
+
+  if (!desc || isNaN(monto)) {
+    alert("Completa todos los campos.");
+    return;
+  }
+
+  g.descripcion = `${cat} - ${desc}`;
+  g.monto = monto;
+  delete g.editando;
+
+  localStorage.setItem("gastos", JSON.stringify(gastos));
+  mostrarBloques();
+  actualizarTotal();
 }
 
 function editarGasto(fecha, index) {
@@ -443,17 +513,44 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function exportarBloqueReporte(fecha) {
-  const bloqueDOM = document.querySelector(`.bloque[data-fecha="${fecha}"]`);
+  const contenedor = document.querySelector(`.bloque[data-fecha="${fecha}"]`);
+  if (!contenedor) return;
 
-  if (!bloqueDOM) {
-    alert("No se encontró el bloque.");
-    return;
-  }
+  document.querySelectorAll(".menu-reporte").forEach(e => e.remove());
+
+  const opciones = document.createElement("div");
+  opciones.className = "menu-reporte";
+  opciones.innerHTML = `
+    <button onclick="generarImagen('${fecha}')">📷 Imagen</button>
+    <button onclick="generarPDF('${fecha}')">📑 PDF</button>
+    <button onclick="generarExcel('${fecha}')">📊 Excel</button>
+  `;
+
+  const btnReporte = contenedor.querySelector(".btn-reporte");
+  if (!btnReporte) return;
+
+  const rect = btnReporte.getBoundingClientRect();
+  document.body.appendChild(opciones);
+
+  opciones.style.top = `${rect.top + window.scrollY - opciones.offsetHeight - 10}px`;
+  opciones.style.left = `${rect.left + window.scrollX}px`;
+
+  setTimeout(() => {
+    window.addEventListener("click", () => {
+      opciones.remove();
+    }, { once: true });
+  }, 100);
+}
+
+function generarImagen(fecha) {
+  const bloqueDOM = document.querySelector(`.bloque[data-fecha="${fecha}"]`);
+  if (!bloqueDOM) return;
 
   const clone = bloqueDOM.cloneNode(true);
   clone.querySelectorAll("button").forEach(btn => btn.remove());
 
   const wrapper = document.createElement("div");
+  wrapper.className = "modo-claro-temporal";
   wrapper.style.padding = "20px";
   wrapper.style.background = "#fff";
   wrapper.style.color = "#000";
@@ -469,4 +566,62 @@ function exportarBloqueReporte(fecha) {
     link.click();
     wrapper.remove();
   });
+}
+
+function generarPDF(fecha) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("📄 Reporte de Gasto Diario", 20, y);
+  y += 10;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text(`📅 Fecha: ${fecha}`, 20, y);
+  y += 10;
+
+  bloque.items.forEach(g => {
+    doc.text(`• ${g.descripcion}`, 20, y); y += 6;
+    doc.text(`   Hora: ${g.hora}    Monto: S/ ${g.monto.toFixed(2)}`, 22, y); y += 7;
+  });
+
+  y += 5;
+  const total = bloque.items.reduce((acc, g) => acc + g.monto, 0);
+  doc.setFont("helvetica", "bold");
+  doc.text(`🧾 Total del día: S/ ${total.toFixed(2)}`, 20, y);
+
+  doc.save(`Reporte_${fecha.replaceAll("/", "-")}.pdf`);
+}
+
+function generarExcel(fecha) {
+  const bloque = gastos.find(b => b.fecha === fecha);
+  if (!bloque) return;
+
+  const data = [
+    ["REPORTE DE GASTOS"],
+    [`Fecha: ${fecha}`],
+    [],
+    ["Descripción", "Hora", "Monto (S/)"],
+    ...bloque.items.map(g => [
+      g.descripcion,
+      g.hora,
+      Number(g.monto)
+    ])
+  ];
+
+  const total = bloque.items.reduce((acc, g) => acc + g.monto, 0);
+  data.push([]);
+  data.push(["", "Total del día", total]);
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Gastos");
+
+  XLSX.writeFile(wb, `Reporte_${fecha.replaceAll("/", "-")}.xlsx`);
 }

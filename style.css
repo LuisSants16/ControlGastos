@@ -1,4 +1,10 @@
 
+*{
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
 body{
   font-family: monospace;
   background-color: rgba(0, 0, 0, 0.637);
@@ -44,7 +50,7 @@ h1 {
 .form input, .form select, .form button {
   padding: 10px;
   border-radius: 8px;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.192);
   font-size: 1rem;
 }
 
@@ -282,10 +288,215 @@ body.dark .btn-importar {
   transition: background-color 0.4s ease;
 }
 
+.bloque-item.editando {
+  background: #444 !important;
+  border: 1px solid #666;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.3s ease;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.bloque-item.editando select,
+.bloque-item.editando input {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #2c2c2c;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.bloque-item.editando select:focus,
+.bloque-item.editando input:focus {
+  background-color: #333;
+  outline: none;
+  transform: scale(1.01);
+}
+
+.bloque-item.editando .edit-botones button {
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.bloque-item.editando .edit-botones button:hover {
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modo-claro-temporal * {
+  background: #fff !important;
+  color: #000 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.menu-reporte {
+  position: absolute;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  animation: fadeInScale 0.2s ease-out;
+  z-index: 9999;
+}
+
+.menu-reporte button {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.menu-reporte button:hover {
+  background: #fdd835;
+  color: #000;
+  transform: scale(1.05);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.form-inline {
+  background: #2e2e2e;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-inline select,
+.form-inline input {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #3a3a3a;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+.form-inline input::placeholder {
+  color: #ccc;
+}
+
+.form-inline input:focus,
+.form-inline select:focus {
+  outline: none;
+  background-color: #444;
+}
+
+.form-inline .btn-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-inline .btn-group button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.form-inline .btn-group button:first-child {
+  background: #4caf50;
+  color: #fff;
+}
+
+.form-inline .btn-group button:last-child {
+  background: #e53935;
+  color: #fff;
+}
+
+body:not(.dark) .form-inline {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark) .form-inline input,
+body:not(.dark) .form-inline select {
+  background: #f4f4f4;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
+body:not(.dark) .form-inline input::placeholder {
+  color: #888;
+}
+
+body:not(.dark) .form-inline .btn-group button:first-child {
+  background: #4caf50;
+  color: white;
+}
+
+body:not(.dark) .form-inline .btn-group button:last-child {
+  background: #e53935;
+  color: white;
+}
+
+body:not(.dark) .menu-reporte {
+  background: #ffffff !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+body:not(.dark) .menu-reporte button {
+  background: #f2f2f2;
+  color: #111;
+}
+
+body:not(.dark) .menu-reporte button:hover {
+  background: #fdd835;
+  color: #000;
+}
+
 footer {
   margin-top: 30px;
   text-align: center;
   color: #aaa;
+  padding-bottom: 20px;
 }
 
 body:not(.dark) {
@@ -300,7 +511,7 @@ body:not(.dark) .container {
 }
 
 body:not(.dark) .acciones button {
-  background: #44444459;
+  background: #44444425;
   color: #000000;
 }
 
@@ -329,14 +540,18 @@ body:not(.dark) .calendario td {
   color: #000;
 }
 
+body:not(.dark) .calendario th,body:not(.dark) .calendario-header span#tituloMes{
+  color: #a32e00;
+}
+
 body:not(.dark) .calendario td:hover {
-  background: #fdd835;
-  color: #000;
+  background: #a32e00;
+  color: #ffffff;
 }
 
 body:not(.dark) .calendario td.activo {
-  background: #fdd835;
-  color: #000;
+  background: #a32e00;
+  color: #ffffff;
 }
 
 body.dark .bloque-acciones button {
@@ -346,6 +561,32 @@ body.dark .bloque-acciones button {
 
 body.dark .bloque-acciones button:hover {
   background: #444;
+}
+
+body:not(.dark) .bloque-item.editando {
+  background: #e0e0e0 !important;
+  border: 1px solid #ccc;
+}
+
+body:not(.dark) .bloque-item.editando select,
+body:not(.dark) .bloque-item.editando input {
+  background-color: #ffffff;
+  color: #000;
+  border: 1px solid #bbb;
+}
+
+body:not(.dark) .bloque-item.editando input::placeholder {
+  color: #666;
+}
+
+body:not(.dark) .bloque-item.editando .edit-botones button:first-child {
+  background: #4caf50;
+  color: #fff;
+}
+
+body:not(.dark) .bloque-item.editando .edit-botones button:last-child {
+  background: #e53935;
+  color: #fff;
 }
 
 @media (max-width: 600px) {
