@@ -193,7 +193,6 @@ function mostrarBloques() {
   btnReporte.onclick = () => exportarBloqueReporte(bloque.fecha);
   acciones.appendChild(btnReporte);
 
-  /* Botón Borrar bloque */
   const btnBorrar = document.createElement("button");
   btnBorrar.textContent = "🗑️ Borrar bloque";
   btnBorrar.className = "btn-eliminar";
@@ -465,7 +464,6 @@ function generarCalendario() {
   tabla.innerHTML = html;
 }
 
-
 function seleccionarDia(fecha) {
   diaSeleccionado = fecha;
   generarCalendario();
@@ -491,7 +489,9 @@ window.addEventListener("DOMContentLoaded", () => {
   actualizarTotal();
 
   const sueldo = parseFloat(localStorage.getItem("sueldoMensual") || "0");
+
   document.getElementById("sueldoMostrado").textContent = sueldo.toFixed(2);
+
   document.getElementById("prevMes").addEventListener("click", () => {
     mesActual--;
     if (mesActual < 0) {
@@ -499,6 +499,8 @@ window.addEventListener("DOMContentLoaded", () => {
       añoActual--;
     }
     generarCalendario();
+    mostrarBloques();
+    generarResumenMensual();
   });
 
   document.getElementById("nextMes").addEventListener("click", () => {
@@ -508,6 +510,8 @@ window.addEventListener("DOMContentLoaded", () => {
       añoActual++;
     }
     generarCalendario();
+    mostrarBloques();
+    generarResumenMensual();
   });
 
 });
@@ -625,3 +629,79 @@ function generarExcel(fecha) {
 
   XLSX.writeFile(wb, `Reporte_${fecha.replaceAll("/", "-")}.xlsx`);
 }
+
+function generarResumenMensual() {
+  const resumenContenedor = document.getElementById("resumenMensual");
+  resumenContenedor.innerHTML = "";
+
+  const mes = mesActual + 1;
+  const año = añoActual;
+
+  const gastosMes = gastos.filter(b => {
+    const [dia, mesG, añoG] = b.fecha.split("/").map(n => parseInt(n));
+    return mesG === mes && añoG === año;
+  });
+
+  if (gastosMes.length === 0) {
+    resumenContenedor.innerHTML = "<p>No hay datos para este mes.</p>";
+    return;
+  }
+
+  let total = 0;
+  const categorias = {};
+  const dias = {};
+
+  gastosMes.forEach(b => {
+    const dia = b.fecha;
+    dias[dia] = dias[dia] || 0;
+
+    b.items.forEach(g => {
+      total += g.monto;
+
+      const categoria = g.descripcion.split(" - ")[0].trim();
+      categorias[categoria] = (categorias[categoria] || 0) + 1;
+      dias[dia] += g.monto;
+    });
+  });
+
+  let categoriaMasUsada = "";
+  let maxUsos = 0;
+  for (const cat in categorias) {
+    if (categorias[cat] > maxUsos) {
+      categoriaMasUsada = cat;
+      maxUsos = categorias[cat];
+    }
+  }
+
+  let diaMasCaro = "";
+  let maxDia = 0;
+  for (const d in dias) {
+    if (dias[d] > maxDia) {
+      maxDia = dias[d];
+      diaMasCaro = d;
+    }
+  }
+
+  const promedio = total / gastosMes.length;
+
+  resumenContenedor.innerHTML = `
+    <h3 style="margin-bottom: 15px; font-size: 20px">📅 Resumen de ${getNombreMes(mes)} ${año}</h3>
+    <div class="linea-resumen">💰 <strong>Total gastado:</strong> S/ ${total.toFixed(2)}</div>
+    <div class="linea-resumen">🍔 <strong>Categoría más usada:</strong> ${categoriaMasUsada}</div>
+    <div class="linea-resumen">📅 <strong>Día más costoso:</strong> ${diaMasCaro} (S/ ${maxDia.toFixed(2)})</div>
+    <div class="linea-resumen">📊 <strong>Promedio diario:</strong> S/ ${promedio.toFixed(2)}</div>
+  `;
+
+}
+
+function getNombreMes(numero) {
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+  return meses[numero - 1] || "";
+}
+
+generarResumenMensual();
+
+

@@ -449,6 +449,31 @@ body.dark .btn-importar {
   color: #fff;
 }
 
+.linea-resumen {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.resumen-card {
+  background: #1e1e1e;
+  border-radius: 16px;
+  padding: 28px 24px 20px 24px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  color: #fff;
+  max-width: 500px;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+}
+
+.resumen-card .linea-resumen:first-of-type {
+  margin-top: 8px;
+}
+
 body:not(.dark) .form-inline {
   background: #f9f9f9;
   border: 1px solid #ddd;
@@ -638,13 +663,24 @@ body:not(.dark) .bloque-item.editando .edit-botones button:last-child {
   }
 
   .calendario-header {
-    flex-direction: column;
-    gap: 10px;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 15px;
+    flex-direction: row;
   }
 
   .calendario-header span#tituloMes {
     font-size: 1.2rem;
     text-align: center;
+  }
+
+  .calendario-header button,
+  .calendario-header #tituloMes {
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .calendario td {
