@@ -26,21 +26,34 @@ function agregarGasto() {
   const categoria = document.getElementById("categoria").value;
   const descripcion = document.getElementById("descripcion").value.trim();
   const monto = parseFloat(document.getElementById("monto").value);
-  if (!descripcion || isNaN(monto)) return alert("Completa los datos.");
+
+  if (!descripcion || isNaN(monto)) {
+    mostrarAlerta("⚠️ Completa correctamente los campos.", "advertencia");
+    return; // ❗ Detener si hay error
+  }
+
   const hora = new Date().toLocaleTimeString();
   const id = Date.now() + Math.random();
-  const gasto = { id, descripcion: categoria + " - " + descripcion, monto, hora };
-  const bloque = gastos.find(b => b.fecha === diaSeleccionado);
+  const gasto = {
+    id,
+    descripcion: categoria + " - " + descripcion,
+    monto,
+    hora,
+  };
+
+  const bloque = gastos.find((b) => b.fecha === diaSeleccionado);
   if (bloque) {
     bloque.items.push(gasto);
   } else {
     gastos.push({ fecha: diaSeleccionado, items: [gasto] });
   }
+
   localStorage.setItem("gastos", JSON.stringify(gastos));
   document.getElementById("descripcion").value = "";
   document.getElementById("monto").value = "";
   mostrarBloques();
   actualizarTotal();
+  mostrarAlerta("✅ Gasto agregado correctamente.", "exito");
 }
 
 function guardarSueldo() {
@@ -48,23 +61,23 @@ function guardarSueldo() {
   if (!isNaN(sueldo)) {
     localStorage.setItem("sueldoMensual", sueldo);
     document.getElementById("sueldoMostrado").textContent = sueldo.toFixed(2);
-    alert("💾 Sueldo guardado correctamente.");
+    mostrarAlerta("✅ Sueldo guardado correctamente.", "exito");
   } else {
-    alert("Ingresa un sueldo válido.");
+    mostrarAlerta("❌ Ingresa un sueldo válido.");
   }
 }
 
 function mostrarBloques() {
   const contenedor = document.getElementById("bloques");
   contenedor.innerHTML = "";
-  const bloque = gastos.find(b => b.fecha === diaSeleccionado);
+  const bloque = gastos.find((b) => b.fecha === diaSeleccionado);
   if (!bloque) return;
 
   const div = document.createElement("div");
   div.className = "bloque";
-  div.dataset.fecha = bloque.fecha
+  div.dataset.fecha = bloque.fecha;
 
-    div.ondragover = (e) => {
+  div.ondragover = (e) => {
     e.preventDefault();
   };
 
@@ -74,11 +87,11 @@ function mostrarBloques() {
     const data = JSON.parse(e.dataTransfer.getData("text/plain"));
     const { gastoId, fechaOrigen } = data;
 
-    const bloqueOrigen = gastos.find(b => b.fecha === fechaOrigen);
+    const bloqueOrigen = gastos.find((b) => b.fecha === fechaOrigen);
     const bloqueDestino = bloque;
     if (!bloqueOrigen || !bloqueDestino) return;
 
-    const fromIndex = bloqueOrigen.items.findIndex(g => g.id === gastoId);
+    const fromIndex = bloqueOrigen.items.findIndex((g) => g.id === gastoId);
     if (fromIndex === -1) return;
 
     const [movido] = bloqueOrigen.items.splice(fromIndex, 1);
@@ -91,8 +104,10 @@ function mostrarBloques() {
 
     setTimeout(() => {
       const bloquesDOM = document.querySelectorAll(".bloque");
-      bloquesDOM.forEach(b => {
-        const item = [...b.querySelectorAll(".bloque-item")].find(el => el.dataset.id == idMovido);
+      bloquesDOM.forEach((b) => {
+        const item = [...b.querySelectorAll(".bloque-item")].find(
+          (el) => el.dataset.id == idMovido
+        );
         if (item) {
           item.classList.add("gasto-cambiado");
           setTimeout(() => item.classList.remove("gasto-cambiado"), 1000);
@@ -103,15 +118,15 @@ function mostrarBloques() {
 
   let subtotal = 0;
   bloque.items.forEach((g, i) => {
-  const item = document.createElement("div");
-  item.className = "bloque-item";
+    const item = document.createElement("div");
+    item.className = "bloque-item";
 
-  const puedeSubir = i > 0;
-  const puedeBajar = i < bloque.items.length - 1;
+    const puedeSubir = i > 0;
+    const puedeBajar = i < bloque.items.length - 1;
 
-  if (g.editando) {
-  item.classList.add("editando");
-  item.innerHTML = `
+    if (g.editando) {
+      item.classList.add("editando");
+      item.innerHTML = `
     <select id="editCat${g.id}">
       <option value="🍔 Comida">🍔 Comida</option>
       <option value="🚗 Movilidad">🚗 Movilidad</option>
@@ -124,31 +139,47 @@ function mostrarBloques() {
       <option value="💊 Salud">💊 Salud</option>
       <option value="📚 Educación">📚 Educación</option>
     </select>
-    <input type="text" id="editDesc${g.id}" value="${g.descripcion.split(' - ')[1] || ''}" placeholder="Descripción" />
-    <input type="number" id="editMonto${g.id}" value="${g.monto}" placeholder="Monto (S/.)" />
+    <input type="text" id="editDesc${g.id}" value="${
+        g.descripcion.split(" - ")[1] || ""
+      }" placeholder="Descripción" />
+    <input type="number" id="editMonto${g.id}" value="${
+        g.monto
+      }" placeholder="Monto (S/.)" />
     <div class="edit-botones">
-      <button onclick="confirmarEdicionInline('${bloque.fecha}', ${i})">✔️</button>
-      <button onclick="cancelarEdicionInline('${bloque.fecha}', ${i})">❌</button>
+      <button onclick="confirmarEdicionInline('${
+        bloque.fecha
+      }', ${i})">✔️</button>
+      <button onclick="cancelarEdicionInline('${
+        bloque.fecha
+      }', ${i})">❌</button>
     </div>
   `;
 
-    setTimeout(() => {
-      document.getElementById(`editCat${g.id}`).value = g.descripcion.split(" - ")[0];
-      document.getElementById(`editDesc${g.id}`).focus();
-    }, 10);
-
-  } else {
-    item.innerHTML = `
+      setTimeout(() => {
+        document.getElementById(`editCat${g.id}`).value =
+          g.descripcion.split(" - ")[0];
+        document.getElementById(`editDesc${g.id}`).focus();
+      }, 10);
+    } else {
+      item.innerHTML = `
       <span>${g.descripcion} (${g.hora})</span>
       <div class="gasto-acciones">
         <span>S/ ${g.monto.toFixed(2)}</span>
-        ${i > 0 ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'up')">⬆️</button>` : ""}
-        ${i < bloque.items.length - 1 ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'down')">⬇️</button>` : ""}
+        ${
+          i > 0
+            ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'up')">⬆️</button>`
+            : ""
+        }
+        ${
+          i < bloque.items.length - 1
+            ? `<button onclick="moverGasto('${bloque.fecha}', ${i}, 'down')">⬇️</button>`
+            : ""
+        }
         <button onclick="editarGastoInline('${bloque.fecha}', ${i})">✏️</button>
         <button onclick="eliminarGasto('${bloque.fecha}', ${i})">❌</button>
       </div>
     `;
-  }
+    }
 
     div.appendChild(item);
     subtotal += g.monto;
@@ -172,10 +203,14 @@ function mostrarBloques() {
 
   if (limiteDiario > 0) {
     if (subtotal > limiteDiario) {
-      mensaje.textContent = `⚠️ ¡Has superado el gasto diario sugerido de S/ ${limiteDiario.toFixed(2)}!`;
+      mensaje.textContent = `⚠️ ¡Has superado el gasto diario sugerido de S/ ${limiteDiario.toFixed(
+        2
+      )}!`;
       mensaje.style.backgroundColor = "#ff5252aa";
     } else {
-      mensaje.textContent = `✅ Vas bien. Has gastado S/ ${subtotal.toFixed(2)} de un máximo sugerido de S/ ${limiteDiario.toFixed(2)}.`;
+      mensaje.textContent = `✅ Vas bien. Has gastado S/ ${subtotal.toFixed(
+        2
+      )} de un máximo sugerido de S/ ${limiteDiario.toFixed(2)}.`;
       mensaje.style.backgroundColor = "#4caf5099";
     }
     div.insertBefore(mensaje, total);
@@ -196,24 +231,30 @@ function mostrarBloques() {
   const btnBorrar = document.createElement("button");
   btnBorrar.textContent = "🗑️ Borrar bloque";
   btnBorrar.className = "btn-eliminar";
+
   btnBorrar.onclick = () => {
-    if (confirm("¿Seguro que deseas borrar este bloque completo?")) {
-      const index = gastos.findIndex(b => b.fecha === bloque.fecha);
-      if (index !== -1) {
-        gastos.splice(index, 1);
-        localStorage.setItem("gastos", JSON.stringify(gastos));
-        mostrarBloques();
-        actualizarTotal();
+    mostrarConfirmacion(
+      "🗑️ ¿Seguro que deseas borrar este bloque completo?",
+      () => {
+        const index = gastos.findIndex((b) => b.fecha === bloque.fecha);
+        if (index !== -1) {
+          gastos.splice(index, 1);
+          localStorage.setItem("gastos", JSON.stringify(gastos));
+          mostrarBloques();
+          actualizarTotal();
+          mostrarAlerta("🗑️ Bloque eliminado correctamente.", "info");
+        }
       }
-    }
+    );
   };
+
   acciones.appendChild(btnBorrar);
 
   const btnAgregarGasto = document.createElement("button");
   btnAgregarGasto.textContent = "➕ Agregar gasto";
   btnAgregarGasto.className = "btn-agregar-secundario";
   btnAgregarGasto.onclick = () => {
-    if (div.querySelector('.form-inline')) return;
+    if (div.querySelector(".form-inline")) return;
 
     const form = document.createElement("div");
     form.className = "form-inline";
@@ -246,15 +287,23 @@ function mostrarBloques() {
     const guardarBtn = document.createElement("button");
     guardarBtn.textContent = "✔️ Guardar gasto";
     guardarBtn.onclick = () => {
-      const descripcion = catSelect.value + " - " + descInput.value.trim();
+      const descripcionTexto = descInput.value.trim();
       const monto = parseFloat(montoInput.value);
-      if (!descInput.value.trim() || isNaN(monto)) return alert("Completa los campos.");
+
+      if (!descripcionTexto || isNaN(monto)) {
+        mostrarAlerta("⚠️ Completa correctamente los campos.", "advertencia");
+        return;
+      }
+
+      const descripcion = catSelect.value + " - " + descripcionTexto;
       const hora = new Date().toLocaleTimeString();
       const id = Date.now() + Math.random();
+
       bloque.items.push({ id, descripcion, monto, hora });
       localStorage.setItem("gastos", JSON.stringify(gastos));
       mostrarBloques();
       actualizarTotal();
+      mostrarAlerta("✅ Gasto agregado correctamente.", "exito");
     };
 
     const cancelarBtn = document.createElement("button");
@@ -282,21 +331,21 @@ function mostrarBloques() {
 }
 
 function editarGastoInline(fecha, index) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
   bloque.items[index].editando = true;
   mostrarBloques();
 }
 
 function cancelarEdicionInline(fecha, index) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
   delete bloque.items[index].editando;
   mostrarBloques();
 }
 
 function confirmarEdicionInline(fecha, index) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
 
   const g = bloque.items[index];
@@ -305,7 +354,7 @@ function confirmarEdicionInline(fecha, index) {
   const monto = parseFloat(document.getElementById(`editMonto${g.id}`).value);
 
   if (!desc || isNaN(monto)) {
-    alert("Completa todos los campos.");
+    mostrarAlerta("⚠️ Completa todos los campos.", "advertencia");
     return;
   }
 
@@ -316,10 +365,11 @@ function confirmarEdicionInline(fecha, index) {
   localStorage.setItem("gastos", JSON.stringify(gastos));
   mostrarBloques();
   actualizarTotal();
+  mostrarAlerta("✏️ Gasto editado correctamente.", "info");
 }
 
 function editarGasto(fecha, index) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
   const g = bloque.items[index];
   const nuevaDescripcion = prompt("Editar descripción:", g.descripcion);
@@ -333,31 +383,39 @@ function editarGasto(fecha, index) {
 }
 
 function eliminarGasto(fecha, index) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
-  if (confirm("¿Eliminar este gasto?")) {
+
+  mostrarConfirmacion("🗑️ ¿Eliminar este gasto?", () => {
     bloque.items.splice(index, 1);
     localStorage.setItem("gastos", JSON.stringify(gastos));
     mostrarBloques();
     actualizarTotal();
-  }
+    mostrarAlerta("🗑️ Gasto eliminado correctamente.", "info");
+  });
 }
 
 function moverGasto(fecha, index, direccion) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
 
   let nuevoIndex = index;
   let tipoMovimiento = null;
 
-  if (direccion === 'up' && index > 0) {
-    [bloque.items[index - 1], bloque.items[index]] = [bloque.items[index], bloque.items[index - 1]];
+  if (direccion === "up" && index > 0) {
+    [bloque.items[index - 1], bloque.items[index]] = [
+      bloque.items[index],
+      bloque.items[index - 1],
+    ];
     nuevoIndex = index - 1;
-    tipoMovimiento = 'subio';
-  } else if (direccion === 'down' && index < bloque.items.length - 1) {
-    [bloque.items[index + 1], bloque.items[index]] = [bloque.items[index], bloque.items[index + 1]];
+    tipoMovimiento = "subio";
+  } else if (direccion === "down" && index < bloque.items.length - 1) {
+    [bloque.items[index + 1], bloque.items[index]] = [
+      bloque.items[index],
+      bloque.items[index + 1],
+    ];
     nuevoIndex = index + 1;
-    tipoMovimiento = 'bajo';
+    tipoMovimiento = "bajo";
   } else {
     return;
   }
@@ -367,19 +425,35 @@ function moverGasto(fecha, index, direccion) {
 
   setTimeout(() => {
     const bloquesDOM = document.querySelectorAll(".bloque");
-    bloquesDOM.forEach(b => {
+    bloquesDOM.forEach((b) => {
       const items = b.querySelectorAll(".bloque-item");
       const item1 = items[nuevoIndex];
       const item2 = items[index];
 
       if (item1) {
-        item1.classList.add(tipoMovimiento === 'subio' ? 'gasto-subio' : 'gasto-bajo');
-        setTimeout(() => item1.classList.remove(tipoMovimiento === 'subio' ? 'gasto-subio' : 'gasto-bajo'), 1000);
+        item1.classList.add(
+          tipoMovimiento === "subio" ? "gasto-subio" : "gasto-bajo"
+        );
+        setTimeout(
+          () =>
+            item1.classList.remove(
+              tipoMovimiento === "subio" ? "gasto-subio" : "gasto-bajo"
+            ),
+          1000
+        );
       }
 
       if (item2) {
-        item2.classList.add(tipoMovimiento === 'subio' ? 'gasto-bajo' : 'gasto-subio');
-        setTimeout(() => item2.classList.remove(tipoMovimiento === 'subio' ? 'gasto-bajo' : 'gasto-subio'), 1000);
+        item2.classList.add(
+          tipoMovimiento === "subio" ? "gasto-bajo" : "gasto-subio"
+        );
+        setTimeout(
+          () =>
+            item2.classList.remove(
+              tipoMovimiento === "subio" ? "gasto-bajo" : "gasto-subio"
+            ),
+          1000
+        );
       }
     });
   }, 100);
@@ -387,8 +461,10 @@ function moverGasto(fecha, index, direccion) {
 
 function actualizarTotal() {
   let total = 0;
-  gastos.forEach(b => b.items.forEach(g => total += g.monto));
-  document.getElementById("totalGeneral").textContent = `💰 Total General: S/ ${total.toFixed(2)}`;
+  gastos.forEach((b) => b.items.forEach((g) => (total += g.monto)));
+  document.getElementById(
+    "totalGeneral"
+  ).textContent = `💰 Total General: S/ ${total.toFixed(2)}`;
 }
 
 function exportarJSON() {
@@ -405,8 +481,9 @@ function exportarJSON() {
 function importarJSON(event) {
   const file = event.target.files[0];
   if (!file) return;
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     try {
       const datos = JSON.parse(e.target.result);
       if (Array.isArray(datos)) {
@@ -414,14 +491,15 @@ function importarJSON(event) {
         localStorage.setItem("gastos", JSON.stringify(gastos));
         mostrarBloques();
         actualizarTotal();
-        alert("✅ Datos importados correctamente.");
+        mostrarAlerta("✅ Datos importados correctamente.", "exito");
       } else {
         throw new Error("Formato incorrecto");
       }
     } catch (err) {
-      alert("❌ Error al importar JSON: " + err.message);
+      mostrarAlerta("❌ Error al importar JSON: " + err.message, "error");
     }
   };
+
   reader.readAsText(file);
 }
 
@@ -430,8 +508,18 @@ let añoActual = new Date().getFullYear();
 
 function generarCalendario() {
   const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
 
   const titulo = document.getElementById("tituloMes");
@@ -448,7 +536,8 @@ function generarCalendario() {
     fecha.setDate(fecha.getDate() + 1);
   }
 
-  let html = "<table><tr><th>Dom</th><th>Lun</th><th>Mar</th><th>Mie</th><th>Jue</th><th>Vie</th><th>Sab</th></tr><tr>";
+  let html =
+    "<table><tr><th>Dom</th><th>Lun</th><th>Mar</th><th>Mie</th><th>Jue</th><th>Vie</th><th>Sab</th></tr><tr>";
   let diaSemana = dias[0].getDay();
 
   for (let i = 0; i < diaSemana; i++) html += "<td></td>";
@@ -471,7 +560,6 @@ function seleccionarDia(fecha) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-
   const btn = document.getElementById("modoOscuroBtn");
   const modoGuardado = localStorage.getItem("modoOscuro") === "true";
 
@@ -513,14 +601,13 @@ window.addEventListener("DOMContentLoaded", () => {
     mostrarBloques();
     generarResumenMensual();
   });
-
 });
 
 function exportarBloqueReporte(fecha) {
   const contenedor = document.querySelector(`.bloque[data-fecha="${fecha}"]`);
   if (!contenedor) return;
 
-  document.querySelectorAll(".menu-reporte").forEach(e => e.remove());
+  document.querySelectorAll(".menu-reporte").forEach((e) => e.remove());
 
   const opciones = document.createElement("div");
   opciones.className = "menu-reporte";
@@ -536,13 +623,19 @@ function exportarBloqueReporte(fecha) {
   const rect = btnReporte.getBoundingClientRect();
   document.body.appendChild(opciones);
 
-  opciones.style.top = `${rect.top + window.scrollY - opciones.offsetHeight - 10}px`;
+  opciones.style.top = `${
+    rect.top + window.scrollY - opciones.offsetHeight - 10
+  }px`;
   opciones.style.left = `${rect.left + window.scrollX}px`;
 
   setTimeout(() => {
-    window.addEventListener("click", () => {
-      opciones.remove();
-    }, { once: true });
+    window.addEventListener(
+      "click",
+      () => {
+        opciones.remove();
+      },
+      { once: true }
+    );
   }, 100);
 }
 
@@ -551,7 +644,7 @@ function generarImagen(fecha) {
   if (!bloqueDOM) return;
 
   const clone = bloqueDOM.cloneNode(true);
-  clone.querySelectorAll("button").forEach(btn => btn.remove());
+  clone.querySelectorAll("button").forEach((btn) => btn.remove());
 
   const wrapper = document.createElement("div");
   wrapper.className = "modo-claro-temporal";
@@ -563,7 +656,7 @@ function generarImagen(fecha) {
   wrapper.appendChild(clone);
 
   document.body.appendChild(wrapper);
-  html2canvas(wrapper).then(canvas => {
+  html2canvas(wrapper).then((canvas) => {
     const link = document.createElement("a");
     link.download = "Reporte_" + fecha.replaceAll("/", "-") + ".png";
     link.href = canvas.toDataURL();
@@ -573,7 +666,7 @@ function generarImagen(fecha) {
 }
 
 function generarPDF(fecha) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
 
   const { jsPDF } = window.jspdf;
@@ -590,9 +683,11 @@ function generarPDF(fecha) {
   doc.text(`📅 Fecha: ${fecha}`, 20, y);
   y += 10;
 
-  bloque.items.forEach(g => {
-    doc.text(`• ${g.descripcion}`, 20, y); y += 6;
-    doc.text(`   Hora: ${g.hora}    Monto: S/ ${g.monto.toFixed(2)}`, 22, y); y += 7;
+  bloque.items.forEach((g) => {
+    doc.text(`• ${g.descripcion}`, 20, y);
+    y += 6;
+    doc.text(`   Hora: ${g.hora}    Monto: S/ ${g.monto.toFixed(2)}`, 22, y);
+    y += 7;
   });
 
   y += 5;
@@ -604,7 +699,7 @@ function generarPDF(fecha) {
 }
 
 function generarExcel(fecha) {
-  const bloque = gastos.find(b => b.fecha === fecha);
+  const bloque = gastos.find((b) => b.fecha === fecha);
   if (!bloque) return;
 
   const data = [
@@ -612,11 +707,7 @@ function generarExcel(fecha) {
     [`Fecha: ${fecha}`],
     [],
     ["Descripción", "Hora", "Monto (S/)"],
-    ...bloque.items.map(g => [
-      g.descripcion,
-      g.hora,
-      Number(g.monto)
-    ])
+    ...bloque.items.map((g) => [g.descripcion, g.hora, Number(g.monto)]),
   ];
 
   const total = bloque.items.reduce((acc, g) => acc + g.monto, 0);
@@ -637,8 +728,8 @@ function generarResumenMensual() {
   const mes = mesActual + 1;
   const año = añoActual;
 
-  const gastosMes = gastos.filter(b => {
-    const [dia, mesG, añoG] = b.fecha.split("/").map(n => parseInt(n));
+  const gastosMes = gastos.filter((b) => {
+    const [dia, mesG, añoG] = b.fecha.split("/").map((n) => parseInt(n));
     return mesG === mes && añoG === año;
   });
 
@@ -651,11 +742,11 @@ function generarResumenMensual() {
   const categorias = {};
   const dias = {};
 
-  gastosMes.forEach(b => {
+  gastosMes.forEach((b) => {
     const dia = b.fecha;
     dias[dia] = dias[dia] || 0;
 
-    b.items.forEach(g => {
+    b.items.forEach((g) => {
       total += g.monto;
 
       const categoria = g.descripcion.split(" - ")[0].trim();
@@ -685,20 +776,92 @@ function generarResumenMensual() {
   const promedio = total / gastosMes.length;
 
   resumenContenedor.innerHTML = `
-    <h3 style="margin-bottom: 15px; font-size: 20px">📅 Resumen de ${getNombreMes(mes)} ${año}</h3>
-    <div class="linea-resumen">💰 <strong>Total gastado:</strong> S/ ${total.toFixed(2)}</div>
+    <h3 style="margin-bottom: 15px; font-size: 20px">📅 Resumen de ${getNombreMes(
+      mes
+    )} ${año}</h3>
+    <div class="linea-resumen">💰 <strong>Total gastado:</strong> S/ ${total.toFixed(
+      2
+    )}</div>
     <div class="linea-resumen">🍔 <strong>Categoría más usada:</strong> ${categoriaMasUsada}</div>
-    <div class="linea-resumen">📅 <strong>Día más costoso:</strong> ${diaMasCaro} (S/ ${maxDia.toFixed(2)})</div>
-    <div class="linea-resumen">📊 <strong>Promedio diario:</strong> S/ ${promedio.toFixed(2)}</div>
+    <div class="linea-resumen">📅 <strong>Día más costoso:</strong> ${diaMasCaro} (S/ ${maxDia.toFixed(
+    2
+  )})</div>
+    <div class="linea-resumen">📊 <strong>Promedio diario:</strong> S/ ${promedio.toFixed(
+      2
+    )}</div>
   `;
 }
 
 function getNombreMes(numero) {
   const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
   return meses[numero - 1] || "";
 }
 
 generarResumenMensual();
+
+function mostrarAlerta(mensaje, tipo = "error") {
+  const alerta = document.getElementById("notificacion");
+  let icono = "";
+
+  switch (tipo) {
+    case "exito":
+      icono = "✅";
+      break;
+    case "info":
+      icono = "ℹ️";
+      break;
+    case "advertencia":
+      icono = "⚠️";
+      break;
+    default:
+      icono = "❌";
+      tipo = "error";
+      break;
+  }
+
+  alerta.innerHTML = `${icono} ${mensaje}`;
+  alerta.className = "mostrar";
+  alerta.classList.remove("exito", "info", "error", "advertencia");
+  alerta.classList.add(tipo);
+
+  setTimeout(() => {
+    alerta.className = "alerta-oculta";
+  }, 3500);
+}
+mostrarAlerta("Estás por pasar el límite", "advertencia");
+
+function mostrarConfirmacion(mensaje, callbackAceptar) {
+  const modal = document.getElementById("modalConfirmacion");
+  const mensajeEl = document.getElementById("modalMensaje");
+  const btnAceptar = document.getElementById("modalAceptar");
+  const btnCancelar = document.getElementById("modalCancelar");
+
+  mensajeEl.textContent = mensaje;
+  modal.classList.remove("modal-oculto");
+
+  const cerrar = () => {
+    modal.classList.add("modal-oculto");
+    btnAceptar.onclick = null;
+    btnCancelar.onclick = null;
+  };
+
+  btnAceptar.onclick = () => {
+    cerrar();
+    callbackAceptar();
+  };
+
+  btnCancelar.onclick = cerrar;
+}
