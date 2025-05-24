@@ -450,11 +450,12 @@ body.dark .btn-importar {
 }
 
 .linea-resumen {
-  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 0.95rem;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .resumen-card {
@@ -468,10 +469,21 @@ body.dark .btn-importar {
   max-width: 500px;
   line-height: 1.6;
   transition: all 0.3s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .resumen-card .linea-resumen:first-of-type {
   margin-top: 8px;
+}
+
+.resumen-card h3 {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .alerta-oculta {
@@ -718,11 +730,10 @@ body:not(.dark) .modal-contenido{
   color: #000;
 }
 
-
-
 @media (max-width: 600px) {
   .container {
     padding: 15px;
+
   }
 
   h1 {
@@ -811,9 +822,20 @@ body:not(.dark) .modal-contenido{
     font-size: 0.95rem;
   }
 
+    .resumen-card {
+    padding: 16px;
+    font-size: 0.95rem;
+  }
+
+  .linea-resumen {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   footer {
     font-size: 0.85rem;
     padding: 10px;
     text-align: center;
+    margin-top: 0px;
   }
 }
