@@ -691,7 +691,6 @@ function generarResumenMensual() {
     <div class="linea-resumen">📅 <strong>Día más costoso:</strong> ${diaMasCaro} (S/ ${maxDia.toFixed(2)})</div>
     <div class="linea-resumen">📊 <strong>Promedio diario:</strong> S/ ${promedio.toFixed(2)}</div>
   `;
-
 }
 
 function getNombreMes(numero) {
@@ -704,4 +703,24 @@ function getNombreMes(numero) {
 
 generarResumenMensual();
 
+function subirJSONaDriveYCompartir() {
+  const contenido = JSON.stringify(gastos, null, 2);
+  const data = {
+    contenido: contenido,
+    nombreArchivo: "reporte_gastos_" + Date.now() + ".json"
+  };
 
+  fetch("https://script.google.com/macros/s/AKfycbw-TCDdjGehoggzuamc_YinQzjmqRWf_bKolTC4kk_K6dZi8BmGgHFT10AFLO01eGBHAA/exec", {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.text())
+  .then(link => {
+    const mensaje = encodeURIComponent(`📎 Aquí está tu reporte JSON:\n${link}`);
+    window.open(`https://wa.me/?text=${mensaje}`, '_blank');
+  })
+  .catch(err => alert("Error al subir: " + err));
+}
