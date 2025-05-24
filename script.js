@@ -705,22 +705,23 @@ generarResumenMensual();
 
 function subirJSONaDriveYCompartir() {
   const contenido = JSON.stringify(gastos, null, 2);
-  const data = {
-    contenido: contenido,
-    nombreArchivo: "reporte_gastos_" + Date.now() + ".json"
-  };
+  const nombre = "gastos_" + Date.now() + ".json";
 
-  fetch("https://script.google.com/macros/s/AKfycbw-TCDdjGehoggzuamc_YinQzjmqRWf_bKolTC4kk_K6dZi8BmGgHFT10AFLO01eGBHAA/exec", {
+  const form = new FormData();
+  form.append("contenido", contenido);
+  form.append("nombreArchivo", nombre);
+
+  fetch("https://script.google.com/macros/s/AKfycbw0S3c-H409wSSu5qlCVkw4u1cz1K2xqhzUxJ7oBK9wajZ0uFyYSBbdb9HaeafY3GmI1A/exec", {
     method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json"
-    }
+    body: form
   })
   .then(res => res.text())
   .then(link => {
-    const mensaje = encodeURIComponent(`📎 Aquí está tu reporte JSON:\n${link}`);
+    const mensaje = encodeURIComponent(`📎 Aquí tienes tu archivo JSON:\n${link}`);
     window.open(`https://wa.me/?text=${mensaje}`, '_blank');
   })
-  .catch(err => alert("Error al subir: " + err));
+  .catch(err => {
+    console.error("Error:", err);
+    alert("❌ Error al subir: " + err.message);
+  });
 }
